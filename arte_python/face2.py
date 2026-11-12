@@ -1,0 +1,40 @@
+import sys;sys.path.insert(0,'.')
+from face import load,PAL
+from PIL import Image
+PAL=dict(PAL);PAL.update({'t':(170,128,110),'x':(150,110,96)})
+FACE=r"""
+..........KKKKKKKKK.........
+........KKHHHHHHHHHKKK......
+......KKHHHHHhhhhhHHHHKK....
+.....KHHHHHhhHHHHHHHhhHHK...
+....KHHHHHHHHHHHHHHHHHHHHK..
+....KHHHHHHHHHHHHHHHHHHHHHK.
+...KfHHHHHHHHHHHHHHHHHHHHK..
+...KffHHHHHHHHHHHHHHHHHHFK..
+..KfffHHHHHHHHHHHHHHHHHFFK..
+..KffFHHKKSSSSSSSSSKKHHFFK..
+..KfFSSSSSSSSSSSSSSSSSSFfK..
+.KsfSKKKKKSSSSSSSSSSSSSSFK..
+.KssSSSSSKKSSSSSKKKKKKSSsK..
+.KsSSSSSSSSSSSSSSSSSSSSSsK..
+.KsSSWWEEESSSSSSSWEEEWSSsK..
+.KsSSsKKKsSSSSSSSsKKKsSSsK..
+..KsSSSSSSSSSSNSSSSSSSmSsK..
+..KsSSSSSSSSSNNSSSSSSSSSsK..
+..KtSSSSSSSSNNNNSSSSSSSStK..
+..KxtSSSSSSBBBBBBSSSSSSxtK..
+..KbxSSSSSBBLLLLLBBSSSSbxK..
+..KBbtSSSBBSUUUUUSBBSStbBK..
+...KBbtSSBSSSSSSSSSBStbBK...
+...KBBbtSSSSSSBBSSSSSbbBK...
+....KBBbtSSSSBBBBSSSSbBK....
+.....KBBbbSSSBBBBSSbbBK.....
+......KBBBbbbBBBBbbbBK......
+.......KKBBBBBBBBBBBKK......
+.........KKKBBBBBKKK........
+..........KsssssssK.........
+"""
+im=load(FACE,PAL);bg=Image.new('RGBA',(im.width+6,im.height+6),(70,50,110,255));bg.paste(im,(3,3),im)
+bg=bg.resize((bg.width*14,bg.height*14),Image.NEAREST)
+b=Image.open('/mnt/user-data/uploads/1b2efb5d-image.jpg').convert('RGBA').crop((150,100,800,950));b=b.resize((int(650*bg.height/850),bg.height))
+c=Image.new('RGBA',(bg.width+b.width+20,bg.height),(0,0,0,255));c.paste(b,(0,0));c.paste(bg,(b.width+20,0));c.save('cmp2.png')

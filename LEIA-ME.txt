@@ -1,0 +1,18 @@
+ZEROZERO - código-fonte
+© 2026 RUBÃO STUDIOS
+
+jogo/
+  O jogo. Abra jogo/index.html no navegador para jogar.
+  - index.html: a página (tela, botões de toque, estilos)
+  - jogo.js: o código do jogo
+  - pixspr.js: os desenhos dos personagens (PIXDATA), gerado por arte_python/export.py
+  - imagens.js: os desenhos dos instrumentos (SIGDATA) e as fotos do telão (TELDATA)
+
+arte_python/
+  Scripts Python (Pillow) que desenham os personagens em pixel art e geram os sprites.
+  - stance.py / stance3.py: corpo, poses, braços e pernas
+  - vocal.py, guitar.py, guitar2.py, baixo.py, batera3.py, dj.py, angelo.py, feijao.py: personagens
+  - vilao1..5.py: as 5 formas do TIGAS
+  - masks.py: máscaras / weapons.py e instruments.py: armas e instrumentos
+  - frames.py: monta os quadros de animação / export.py: gera pixspr.js
+  Para regenerar: python3 export.py e copiar o pixspr.js gerado para jogo/pixspr.js (substituindo o antigo).

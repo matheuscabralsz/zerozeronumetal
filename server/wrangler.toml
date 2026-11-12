@@ -1,0 +1,46 @@
+# The room server: a Worker that only holds the Durable Object classes `Room` (one object per
+# room) and `Lobby` (one object: the room list). It has no public address; the game's Pages
+# Function (functions/api/[[path]].js) reaches it through its ROOMS and LOBBY bindings (see the
+# wrangler.toml at the repo root).
+#   deploy:       bunx wrangler deploy -c server/wrangler.toml
+#   test version: bunx wrangler deploy -c server/wrangler.toml --env test
+name = "zerozero-rooms"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = false
+preview_urls = false
+
+# The Worker's own bindings to its classes. The rooms use LOBBY to keep the room list up to date;
+# the tests use both.
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"
+
+# SQLite-backed Durable Objects: the only kind the free plan allows.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+# The room list: one Durable Object for all rooms.
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Lobby"]
+
+# A separate Worker for test deploys (branch previews of the game), so test rooms never mix
+# with the real ones.
+[env.test]
+name = "zerozero-rooms-test"
+workers_dev = false
+preview_urls = false
+
+[[env.test.durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[env.test.durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"

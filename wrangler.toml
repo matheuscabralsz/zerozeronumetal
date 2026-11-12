@@ -1,0 +1,29 @@
+# The game on Cloudflare Pages (project "zerozeronumetal"): the static game in jogo/ plus the
+# Pages Function in functions/ (/api/*). Once this file exists, the Pages bindings come from
+# here, not from the Cloudflare dashboard.
+name = "zerozeronumetal"
+pages_build_output_dir = "jogo"
+compatibility_date = "2026-11-01"
+
+# Production: the rooms live in the Worker "zerozero-rooms" (server/wrangler.toml).
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+script_name = "zerozero-rooms"
+
+[[durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"
+script_name = "zerozero-rooms"
+
+# Preview (branch deploys such as test.zerozeronumetal.pages.dev): the test Worker, so test
+# rooms never mix with the real ones.
+[[env.preview.durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+script_name = "zerozero-rooms-test"
+
+[[env.preview.durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"
+script_name = "zerozero-rooms-test"

@@ -1,0 +1,16 @@
+{
+  "name": "zerozero",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:game": "vitest run --project game",
+    "test:worker": "vitest run --project worker"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.8.1",
+    "jsdom": "27.4.0",
+    "vitest": "4.1.12",
+    "wrangler": "4.161.0"
+  }
+}

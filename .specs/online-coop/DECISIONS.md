@@ -1,0 +1,164 @@
+# Online co-op — decisions
+
+The test names in `tests/multiplayer.integration.test.js` and `tests/rooms.integration.test.js` are the list of decisions.
+This file only keeps the full rule and the reason for each one.
+
+## How it works (approved)
+
+- The room creator's browser runs the real game (host). The friend's browser (guest) sends its button presses and draws the state the host sends.
+- The room server is a Cloudflare Durable Object in the same Cloudflare account. The game address stays `zerozeronumetal.pages.dev`.
+- The Cloudflare free plan has a daily message limit (see NEW-63).
+- Each room still has a short hidden id. The players never see it; the server uses it to find the room, and a dropped player uses it to come back. A second Durable Object (the lobby) keeps the list of rooms and their names.
+
+## Approved by the user (2026-11-12)
+
+- **D1** — With 2 players, normal enemies get x1.5 health and x1.5 damage, and each normal wave has 2x as many enemies.
+- **D2** — Bosses get x2.5 health and x2.5 damage. Bosses are ROBÔ CHEFÃO, TIGAS, and CARECA & LOUCA. Boss fights are NOT doubled (still one TIGAS). The drones in boss fights follow the normal-enemy rules (x1.5 and doubled).
+- **D3** — A player who loses all lives watches. It is game over only when both players are out.
+- **D4** — If one player leaves, the other keeps playing alone. New waves go back to 1-player strength. Detail: when player 1 (host) leaves, player 2's (guest's) browser takes over the game from the last state it received, so the guest goes on from the same moment with the same stage, enemies, lives, money and level, and sees 'JOGADOR 1 SAIU'. (NEW-42 from the first draft, 'the guest restarts the stage', was dropped because it would weaken this decision.)
+- **D5** — CHANGED by the user (2026-11-12): rooms have a name and are in a list. The creator gives the room a name (the game suggests names, or the creator types one). The friend sees the list of open rooms and joins one, with no code or password. A room still holds at most 2 players.
+  - Why: The user wants it simpler; only real friends play this game, so an open list is fine.
+  - Before: private codes only, typed by the friend, no public list.
+- **D6** — Each player picks a DIFFERENT band member.
+- **D7** — Shop and pause stop the game for both players, and the other player sees why (for example 'JOGADOR 1 ESTÁ NA LOJA'). Both players enter the bonus room together.
+
+## New decisions (approved by the user with the test list, 2026-11-12)
+
+- **NEW-1** — The title screen shows three entries, 1 JOGADOR, CRIAR SALA and ENTRAR NA SALA, and 1 JOGADOR is selected first, so pressing start at once works like today.
+  - Why: Players need a way into online play, and today's quick start must not change.
+- **NEW-2** — 1 JOGADOR never connects to the room server.
+  - Why: 1-player keeps working with no internet and does not use the free plan's daily limit.
+- **NEW-3** — OPEN item, default: 2 players on one keyboard is NOT a visible feature in this version; co-op is online only.
+  - Why: Today both key sets move the same fighter; splitting them needs a second key map and key editor, so it can come later.
+- **NEW-4** — CHANGED with D5: while waiting, the creator sees the room name in big letters and 'ESPERANDO JOGADOR 2...'.
+  - Why: The creator can tell the friend which room to pick.
+- **NEW-5** — CHANGED with D5: the creator types the room name in a normal text box over the game (it opens the phone keyboard); while the box is open, typed letters do not act as menu or game keys, and M does not mute the sound.
+  - Why: Names contain letters like K, X and M that are game keys, and phones have no keyboard inside the game.
+- **NEW-6** — When the friend joins, both devices go to the select screen at the same time.
+  - Why: Both players pick their band members at the same time.
+- **NEW-7** — The game leaves the select screen only when both players have confirmed a band member.
+  - Why: Each player needs a fighter before the stage starts.
+- **NEW-8** — Only the host can change and confirm the stage on the stage choice screen; the guest sees the same screen, and their up/down does nothing.
+  - Why: One person must decide, and the host runs the game.
+- **NEW-9** — On the story, band show, stage clear and game over screens, a press from either player moves on, after the same wait times as today.
+  - Why: Both players watch the same screen, so nobody has to wait for the other.
+- **NEW-10** — In a 2-player game the story shows both band members walking and ends with 'Boraaa, <P1 name> E <P2 name>!', and in the band show both chosen band members leave the band line-up and walk in to their own places (also a player who was out); a 1-player game is unchanged.
+  - Why: These scenes use only one band member today, so player 2's band member would be missing from the story and would stand in the band as an extra member.
+- **NEW-11** — Damage to a player = base damage x stage increase x 2-player multiplier, rounded once, then the player's defense is taken off (minimum 1).
+  - Why: The multiplier works the same way as the stage increase, and defense still matters.
+- **NEW-12** — CARECA and LOUCA that appeared with 2-player strength (x2.5) count as bosses for PODER hits (at most 70 damage per hit, and they can not be eaten), also after a player leaves or is out; with 1-player strength and in every 1-player game they work as today.
+  - Why: Otherwise a PODER still kills them in one hit and their x2.5 health means nothing.
+- **NEW-13** — A player who is out counts like a player who left: every enemy that appears while only one player is still playing (next waves, drones, a boss not yet on screen) uses 1-player strength until the next stage starts, and enemies already on screen keep the strength they appeared with.
+  - Why: D4 already does this when a player leaves, and one player alone should not face 2-player waves.
+- **NEW-14** — Each player controls only their own select cursor and their own fighter, with their own keys or touch controls, and player 2 (guest) can run with a double tap or the touch stick, the same as player 1.
+  - Why: No player may move the other's cursor or fighter, and network delay would otherwise break the double-tap run for the guest.
+- **NEW-15** — Both players share one camera that follows the middle point between the players still playing; when only one player is still playing (the other is out or left), the camera works as today and keeps that player at about 42% of the screen.
+  - Why: Co-op beat 'em ups show both players on one screen, and the player who is left should get today's camera.
+- **NEW-16** — While both players are still playing, each player is kept inside the screen; a player at the screen edge stops until the other player comes closer.
+  - Why: Otherwise one player could walk away and leave the other off the screen.
+- **NEW-17** — A wave starts when any player still playing reaches its start point, and a player who is behind is moved to the edge of the locked screen.
+  - Why: The front player sets the pace, as in other co-op beat 'em ups.
+- **NEW-18** — Each enemy chases, attacks and aims at the nearest player who is not out and not knocked down, and chooses again only about once per second, or when its target goes down, is out or leaves.
+  - Why: Enemies spread over both players and do not jump between targets every frame.
+- **NEW-19** — At most 2 normal enemies attack each player still playing at the same time (up to 4 with 2 players); ROBÔ CHEFÃO and TIGAS always attack, as today, and CARECA and LOUCA count toward the limit, as today.
+  - Why: Today's limit of 2 becomes a limit per player, so doubled waves do not all attack one player.
+- **NEW-20** — Enemy hits, boss attacks, traps and the stage 4 runners can hit either player; a bottle, fireball or vomit drop is used up on the first player it hits, a pillar can hit both, and the vomit puddle hurts and slows each player who stands in it.
+  - Why: Both players are in the fight, and the used-up rule stays as today.
+- **NEW-21** — No friendly fire: no punch, kick, weapon, disc, thrown enemy, PODER or get-up blast hurts the other player.
+  - Why: This is normal in co-op beat 'em ups and avoids accidents.
+- **NEW-22** — Players walk through each other and never push or stop each other.
+  - Why: This is normal in beat 'em ups and avoids two devices fighting over one position.
+- **NEW-23** — An enemy can be grabbed by only one player, and the other player can not grab or hit it until it is released.
+  - Why: Otherwise the other player's hit would break the grab at once.
+- **NEW-24** — Each player has their own money: a coin goes to the player who touches it, and in the shop a player pays only with their own money and only that player gets what they buy.
+  - Why: Doubled waves drop twice the coins, so each player gets about the 1-player amount.
+- **NEW-25** — Food (+40 HP) goes to the first player who touches it, also at full HP as today, and heals only that player; a player who is out can not pick it up.
+  - Why: It works like coins (what you pick up is yours), and healing both would make food twice as strong with 2 players.
+- **NEW-26** — XP from a kill is split between the players still playing (each gets half, rounded up), and a player playing alone gets all of it.
+  - Why: With doubled normal waves this keeps the 1-player level speed and both players stay at the same level; a boss is not doubled, so boss XP is a bit slower than today.
+- **NEW-27** — Each player has their own MASC and PODER bars, filled by their own hits (their discs, thrown weapons and thrown enemies included) and by the hits they take, and a MÁSCARA makes only its owner stronger and faster, as today.
+  - Why: Each player's own play should fill their own bars and power.
+- **NEW-28** — Each player has their own 'N HITS' combo counter, shown under their own panel; the other player's hits do not add to it.
+  - Why: A combo is a personal score.
+- **NEW-29** — Only one PODER runs at a time; while one runs, the other player's PODER button does nothing and their full bar is kept for later.
+  - Why: The game supports only one PODER at a time today, and the full bar must not be lost.
+- **NEW-30** — While a PODER runs, both players can not move and can not be hurt, and both devices show the cut-in with the owner's portrait and name.
+  - Why: This keeps today's PODER behavior for the whole fight.
+- **NEW-31** — A stun from a stage 4 runner stops only the player it hits, for 2 seconds as today (it is not damage, so x2.5 does not apply); one runner stuns only the first player it touches, once, and runners take turns on the lane of each player still playing.
+  - Why: One player's mistake should not stop the other player.
+- **NEW-32** — The Feijão helper is decided by the two picks at the start of stage 2: he appears only if neither player picked Feijão, does not appear later in the stage when the Feijão player leaves or is out, and follows player 1 (player 2 if player 1 is out or gone).
+  - Why: There can not be two Feijãos on screen, and he must not appear suddenly in the middle of a stage.
+- **NEW-33** — While the game is stopped for pause or shop, only the player who stopped it can press buttons or go back to the game; the other player's buttons do nothing, their pause button and doors included, with no time limit.
+  - Why: The player who stopped the game may be shopping or changing keys and must not be pulled back into the game.
+- **NEW-34** — Key settings are kept per device: changing keys in the pause menu changes only that player's keys, and they are never sent to the other player.
+  - Why: Each player uses their own keyboard.
+- **NEW-35** — When a player switches to another tab or app, the game pauses for both with 'JOGADOR 1 PAUSOU' (or JOGADOR 2) and goes on only when that player closes their pause menu; a hidden tab with a working connection waits with no time limit, if the connection also drops NEW-46 applies, and a player who is out does not pause the game this way (NEW-38).
+  - Why: A hidden tab already pauses today, and the host's hidden tab can not run the game anyway.
+- **NEW-36** — The bonus room opens once per stage for the team, as today; after both players come back out, the bonus door does not open again in that stage, whoever presses UP.
+  - Why: It keeps today's bonus money per stage; two visits would double the bonus coins.
+- **NEW-37** — A player who is out does not come back during the same stage, and every stage start (next stage, or try again after game over) gives both players 3 lives, also a player who was out.
+  - Why: This is the simplest rule, and the game already gives 3 lives at every stage start.
+- **NEW-38** — A player who is out does not stop the game when they switch tab or app or lose the connection (the game goes on, and after 15 seconds away they count as a player who left), but pressing pause still stops it for both as D7 says; one exception: player 1 (host) always stops the game for the guest when their tab is hidden or their connection drops, because the game runs in the host's browser.
+  - Why: A watcher has no fighter and should not freeze the player who is still fighting, and phone watchers often switch apps.
+- **NEW-39** — The stage clear screen shows one card per player (portrait, name, own money, level) and shows KO, XP and time once as team totals; coins left on the ground go to the nearest player still playing.
+  - Why: Money is per player, but kills, XP and time belong to the team.
+- **NEW-40** — After the last stage, both players go back to the select screen in the same room instead of the title.
+  - Why: They can play again without making a new room.
+- **NEW-41** — In a 2-player game the pause menu has one more entry, 'SAIR DA SALA'; after a SIM/NÃO check the player goes back to the title at once, with no 15-second wait, and the other player gets the normal leave rules; a player who is out can also use it, and a 1-player game has no such entry.
+  - Why: Players need a clear way to leave a room; otherwise the only way is to close the tab, and the other player waits for a return that will not come.
+- **NEW-43** — When a player leaves, their fighter is removed at once: their weapon drops, an enemy they grabbed is released, their running PODER ends, and the other player sees 'JOGADOR 1 SAIU' (or JOGADOR 2).
+  - Why: Nothing of the player who left may stay stuck in the game.
+- **NEW-44** — If the player who paused or is in the shop leaves, the pause or shop ends and the game goes on for the other player.
+  - Why: Otherwise the other player would wait forever.
+- **NEW-45** — If a player leaves while the other player is already out, it is game over; when it is the host who leaves, the guest sees the game over screen and a try again starts a 1-player game.
+  - Why: Nobody is left to play.
+- **NEW-46** — When a player's connection drops, the game pauses for both with 'JOGADOR 1 RECONECTANDO...' (or JOGADOR 2); the same player can come back within 15 seconds with the same fighter, lives, HP, money and level, and after 15 seconds they count as a player who left and can not come back (not for a player who is out, see NEW-38; on the waiting screen NEW-56 applies instead).
+  - Why: Phones often lose the connection for a moment when the user switches apps.
+- **NEW-47** — When a player hides the tab, the window loses focus, or the connection drops, all their held buttons are released.
+  - Why: A lost key release would otherwise keep the fighter walking or blocking forever.
+- **NEW-48** — Player 1 (host) always has the left HUD panel and player 2 (guest) the right one, the same on both devices, and while two players are in the game the 'MUDO' text moves to the top center.
+  - Why: Both players see the same picture, so the layout must be the same.
+- **NEW-49** — While two players are in the game, each fighter has a small 'J1' (red) or 'J2' (blue) tag above the head, in the same color as that player's panel, and there is no tag for a player who is out.
+  - Why: Each player must see which fighter is theirs.
+- **NEW-50** — The panel of a player who is out stays, with a grey portrait and 'FORA' instead of the lives, and that player sees 'VOCÊ ESTÁ FORA - ASSISTINDO'.
+  - Why: Both players must see that one player is out.
+- **NEW-51** — When only one player is in the game (1 JOGADOR, or a 2-player game after the other player left), the screen looks like today: one HUD panel at the top left, 'N HITS' and 'MUDO' in today's places, no player tag, no co-op messages, and today's camera; a player who is out still counts as in the game.
+  - Why: Today's 1-player game must not change, and the player who is left after a leave gets the normal screen back.
+- **NEW-52** — The full-screen color layer of the MÁSCARA is drawn only on the device of the player who has the mask; the other player sees only the glow and the mask on that fighter.
+  - Why: A 10-second color layer that the other player did not choose would hide the fight on their screen.
+- **NEW-53** — On each device, the 'APERTE ...' message, the key hints, the blinking arrow over a weapon on the ground and the MÁSC/PODER button glow use only that device's player and keys.
+  - Why: Each player uses their own keys, so the hints must show their own fighter and key.
+- **NEW-54** — The guest plays the same sound effects as the host (hits, coins, jumps), while music and mute (M) stay local to each device.
+  - Why: Only the host runs the game, so without this the guest hears no sound effects, and each player chooses their own sound.
+- **NEW-55** — DROPPED with D5 (players no longer type codes). Was: a room code uses only C D F G H J K M N P Q R T V W X 3 4 7 9 and typing it is not case-sensitive.
+- **NEW-56** — While the room waits for the friend, the room stays open and in the list when the creator is in another app or has lost the connection, for up to 10 minutes after the room was made; the same room is shown again when the creator comes back, and a friend who joins meanwhile sees 'ESPERANDO JOGADOR 1...' until then.
+  - Why: On a phone the creator may leave the game to message the friend, and the room must not close before the friend can join.
+- **NEW-57** — CHANGED with D5: a player who picks a room that closed a moment ago (after the list was last updated) sees 'SALA NÃO ENCONTRADA', stays on the list, and no room is created.
+  - Why: Joining must never put the friend alone in a new room.
+- **NEW-58** — The game has started when both players have confirmed their band members; after that the room is not in the list and accepts no new player, also when only one player is left; a person who picks it just as it starts sees 'JOGO JÁ COMEÇOU'.
+  - Why: Only the 2 players who started together play, which keeps the rules simple.
+- **NEW-59** — Both devices must run the same game version; a guest with a different version can not join and sees 'VERSÃO DIFERENTE — RECARREGUE A PÁGINA'.
+  - Why: The guest draws the host's game with its own code, so different versions break it.
+- **NEW-60** — If the guest leaves before the game starts, the room stays open, is back in the list, and the host goes back to waiting.
+  - Why: The friend can try again without a new room.
+- **NEW-61** — Before the game starts, the room closes when the host chooses CANCELAR, or when the host leaves after the friend joined (SAIR DA SALA, closing the game, or no connection for more than 15 seconds); the room leaves the list and the guest sees 'JOGADOR 1 SAIU — SALA FECHADA' and goes back to the title (on the waiting screen NEW-56 applies instead).
+  - Why: There is no game to continue yet, and the room belongs to the host.
+- **NEW-62** — When no player is left in a room (both left, or the last one left after the other had gone), the room closes, keeps nothing, and leaves the list.
+  - Why: A late friend must not enter an empty room.
+- **NEW-63** — If the room server can not be reached (no internet, server error, or no answer within 8 seconds), CRIAR SALA and ENTRAR NA SALA show 'SEM CONEXÃO COM O SERVIDOR'; when the free plan's daily limit is used up they show 'MODO ONLINE ESGOTADO HOJE — TENTE AMANHÃ' (or the no-connection message if the two can not be told apart); both go back to the title, where 1 JOGADOR still works.
+  - Why: Players must understand why online play fails, and 1-player must never be blocked.
+
+## New decisions for rooms with names (approved by the user, 2026-11-12)
+
+- **NEW-64** — CRIAR SALA first asks for the room name. The text box starts with a suggested name, already selected, so typing replaces it. ▲▼ in the box, or a tap on one of 3 suggestion buttons under it, puts another suggestion in the box. ENTER, or the CRIAR button, creates the room; ESC goes back to the title.
+  - Why: The user asked for suggestions and typed names. With a suggestion, creating a room is one press, also on a phone.
+- **NEW-65** — A room name keeps only letters (accents included), numbers and spaces. Spaces at the ends are removed, and double spaces become one. The name is cut to 16 characters and shown in capital letters. An empty name gets the suggested name.
+  - Why: The name must fit on the screen and be drawable in the game's pixel font.
+- **NEW-66** — Two rooms that exist at the same time never have the same name: the second one gets ' 2' added (then ' 3', and so on), and the name is cut if needed to stay at 16 characters.
+  - Why: The friend must be able to tell the rooms apart in the list.
+- **NEW-67** — ENTRAR NA SALA shows the names of all rooms that wait for player 2 (also while the creator is away, NEW-56), newest first. The list updates by itself about every 2 seconds, and the selected room stays selected. With no such room it shows 'NENHUMA SALA ABERTA'. Full rooms, started games and closed rooms are not in the list. Rooms made with another game version are in the list; joining one gives the NEW-59 message.
+  - Why: The friend only has to pick a room. Showing other versions tells the friend to reload, instead of showing an empty list with no reason.
+- **NEW-68** — Anyone who opens the game can see and join a room that waits for player 2. There is no code and no password.
+  - Why: The user said only real friends play this game. Accepted risk: a stranger who opens the site can also join.
+- **NEW-69** — On the list, ▲▼ move, ENTER (or J or SPACE) joins, and ESC (or P) goes back to the title. On a phone, the touch arrows, the attack button and the II button do the same. If the chosen room became full or started after the last list update, the player sees 'SALA CHEIA' or 'JOGO JÁ COMEÇOU' and stays on the list.
+  - Why: The same keys as the title menu, and phones have no keyboard inside the game.
